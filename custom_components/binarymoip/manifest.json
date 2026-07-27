@@ -1,11 +1,11 @@
 {
-  "domain": "binarymoip",
-  "name": "Binary MoIP",
-  "version": "0.1",
-  "documentation": "https://www.home-assistant.io/components/binarymoip",
-  "requirements": [
-    "pybinarymoip==0.0.8"
-  ],
-  "dependencies": [],
-  "codeowners": []
+    "domain": "binarymoip",
+    "name": "Binary MoIP",
+    "version": "0.1.0",
+    "documentation": "https://www.home-assistant.io/components/binarymoip",
+    "requirements": [
+          "pybinarymoip==0.0.8"
+    ],
+    "dependencies": [],
+    "codeowners": []
 }
