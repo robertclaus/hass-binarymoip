@@ -5,9 +5,10 @@ import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.const import CONF_HOST, CONF_USERNAME, CONF_PASSWORD
+from homeassistant.core import callback
 from homeassistant.exceptions import HomeAssistantError
 
-from .const import DOMAIN
+from .const import DOMAIN, power_on_key, power_off_key
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -65,6 +66,49 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
+        )
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry):
+        """Get the options flow for this handler."""
+        return OptionsFlowHandler()
+
+
+class OptionsFlowHandler(config_entries.OptionsFlow):
+    """Per-receiver IR power code configuration.
+
+    Pronto Hex codes are TV-specific, so they can't be baked into the
+    integration -- the user supplies them per receiver here. Leaving both
+    fields blank for a receiver just means its remote's turn_on/turn_off
+    won't send anything.
+    """
+
+    async def async_step_init(self, user_input=None):
+        """Manage the options."""
+        if user_input is not None:
+            return self.async_create_entry(title="", data=user_input)
+
+        moip = self.hass.data.get(DOMAIN, {}).get(self.config_entry.entry_id)
+        receivers = moip.receivers if moip else []
+
+        schema_dict = {}
+        for rx in receivers:
+            on_key = power_on_key(rx.name)
+            off_key = power_off_key(rx.name)
+            schema_dict[vol.Optional(
+                on_key,
+                description={
+                    "suggested_value": self.config_entry.options.get(on_key, "")},
+            )] = str
+            schema_dict[vol.Optional(
+                off_key,
+                description={
+                    "suggested_value": self.config_entry.options.get(off_key, "")},
+            )] = str
+
+        return self.async_show_form(
+            step_id="init", data_schema=vol.Schema(schema_dict)
         )
 
 
