@@ -1,7 +1,7 @@
 {
   "domain": "binarymoip",
   "name": "Binary MoIP",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "config_flow": true,
   "documentation": "https://www.home-assistant.io/components/binarymoip",
   "iot_class": "local_polling",
