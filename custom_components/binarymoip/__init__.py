@@ -37,7 +37,7 @@ CONFIG_SCHEMA = vol.Schema({
 
 def _connect(host, username, password):
     """Connect to the MoIP controller. Performs blocking socket I/O."""
-    from pybinarymoip import MoIP
+    from .moip import MoIP
 
     m = MoIP(host, username, password)
     m.connect()
