@@ -22,7 +22,7 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
 
 def _validate_connection(host, username, password):
     """Attempt to connect to the MoIP controller. Runs in an executor."""
-    from pybinarymoip import MoIP
+    from .moip import MoIP
 
     moip = MoIP(host, username, password)
     moip.connect()
