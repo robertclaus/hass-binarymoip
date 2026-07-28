@@ -1,13 +1,11 @@
 {
   "domain": "binarymoip",
   "name": "Binary MoIP",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "config_flow": true,
   "documentation": "https://www.home-assistant.io/components/binarymoip",
   "iot_class": "local_polling",
-  "requirements": [
-    "pybinarymoip==0.0.8"
-  ],
+  "requirements": [],
   "dependencies": [],
   "codeowners": []
 }
