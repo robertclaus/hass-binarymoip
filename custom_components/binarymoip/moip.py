@@ -17,6 +17,10 @@ import threading
 _LOGGER = logging.getLogger(__name__)
 
 
+class MoIPError(Exception):
+    """Raised when the controller rejects a command or doesn't respond."""
+
+
 class MoIP(object):
     """Main SnapAV Binary Media Over IP (MoIP) class."""
 
@@ -110,16 +114,20 @@ class MoIP(object):
         self._sock.send(str.encode())
 
     def _send_check(self, str, timeout=None):
-        """Appends newline to str before sending, confirms OK response."""
+        """Appends newline to str before sending. Raises MoIPError if the
+        controller doesn't acknowledge with OK (including on timeout)."""
         if timeout is None:
             timeout = self._timeout
         with self._socket_lock:
             self._send(str + "\n")
             response = self._read(timeout)
-            _LOGGER.debug("sent '%s', got response = %s", str, response)
-            if response and not response.startswith("OK"):
-                _LOGGER.error("Sent '%s' and got error response: %s",
-                               str, response)
+            _LOGGER.debug("sent %r, got response = %r", str, response)
+            if response is None:
+                raise MoIPError(
+                    "No response from controller after sending: %s" % str)
+            if not response.startswith("OK"):
+                raise MoIPError(
+                    "Controller rejected '%s': %s" % (str, response))
 
     def _read_raw(self, timeout=None):
         if timeout is None:
