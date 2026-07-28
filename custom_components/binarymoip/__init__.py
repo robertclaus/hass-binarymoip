@@ -83,6 +83,11 @@ def setup(hass, config):
     return True
 
 
+async def _async_update_listener(hass, entry):
+    """Reload the entry when options change so entities pick up new IR codes."""
+    await hass.config_entries.async_reload(entry.entry_id)
+
+
 async def async_setup_entry(hass, entry):
     """Set up Binary MoIP from a config entry (added via the UI)."""
     host = entry.data[CONF_HOST]
@@ -103,6 +108,8 @@ async def async_setup_entry(hass, entry):
     }
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = m
+
+    entry.async_on_unload(entry.add_update_listener(_async_update_listener))
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
