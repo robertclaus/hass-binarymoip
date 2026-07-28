@@ -3,11 +3,9 @@ import logging
 
 from homeassistant.components.media_player import (
     MediaPlayerEntity,
+    MediaPlayerEntityFeature,
 )
-from homeassistant.components.media_player.const import (
-    SUPPORT_SELECT_SOURCE,
-)
-from ..binarymoip import DEVICES
+from .const import DEVICES
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -17,19 +15,22 @@ DEVICE_NAME = 'Binary MoIP Rx'
 
 ICON = 'mdi:television'
 
-SUPPORTED_COMMANDS = SUPPORT_SELECT_SOURCE
+SUPPORTED_COMMANDS = MediaPlayerEntityFeature.SELECT_SOURCE
 
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
-    """Set up the MoIP receivers as media_player devices."""
-    devs = []
-    for mp in hass.data[DEVICES]['media_player']:
-        hass_mp = MoIP_MediaPlayer_Rx(mp)
-        devs.append(hass_mp)
-
+    """Set up the MoIP receivers as media_player devices (configuration.yaml)."""
+    devs = [MoIP_MediaPlayer_Rx(mp) for mp in hass.data[DEVICES]['media_player']]
     add_devices(devs, True)
     _LOGGER.debug("MoIP Added %s", devs)
     return True
+
+
+async def async_setup_entry(hass, entry, async_add_entities):
+    """Set up the MoIP receivers as media_player devices (config entry)."""
+    devs = [MoIP_MediaPlayer_Rx(mp) for mp in hass.data[DEVICES]['media_player']]
+    async_add_entities(devs, True)
+    _LOGGER.debug("MoIP Added %s", devs)
 
 
 class MoIP_MediaPlayer_Rx(MediaPlayerEntity):
@@ -41,7 +42,6 @@ class MoIP_MediaPlayer_Rx(MediaPlayerEntity):
         self._unique_id = 'binarymoip-tx-{}-{}'.format(
             moip_rx.name, moip_rx.num)
 
-#    @util.Throttle(MIN_TIME_BETWEEN_SCANS, MIN_TIME_BETWEEN_FORCED_SCANS)
     def update(self):
         """Retrieve latest state of the device."""
         self._rx._mc._update_inputs()
@@ -52,7 +52,7 @@ class MoIP_MediaPlayer_Rx(MediaPlayerEntity):
         num_transmitters = len(self._rx._mc.transmitters)
         if tx_num > num_transmitters:
             _LOGGER.error("tx_num = %s is too large, only %s transmitters",
-                          tx_num, num_transmitters)
+                           tx_num, num_transmitters)
             return None
         else:
             tx = self._rx._mc.transmitters[tx_num-1]
