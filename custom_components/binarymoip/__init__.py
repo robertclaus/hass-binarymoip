@@ -20,7 +20,7 @@ from .const import DOMAIN, DEVICES
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS = [Platform.MEDIA_PLAYER, Platform.SENSOR, Platform.REMOTE]
+PLATFORMS = [Platform.MEDIA_PLAYER, Platform.SENSOR, Platform.REMOTE, Platform.NOTIFY]
 
 # TODO: Make CONF_SCAN_INTERVAL do something
 SCAN_INTERVAL = timedelta(seconds=120)
@@ -51,7 +51,8 @@ def setup(hass, config):
 
     hass.data[DEVICES] = {'media_player': [],
                            'sensor': [],
-                           'remote': []}
+                           'remote': [],
+                           'notify': []}
 
     moip_config = config[DOMAIN]
     host = moip_config[CONF_HOST]
@@ -65,6 +66,7 @@ def setup(hass, config):
             _LOGGER.info("adding MoIP Rx %s", mp)
             hass.data[DEVICES]['media_player'].append(mp)
             hass.data[DEVICES]['remote'].append(mp)
+            hass.data[DEVICES]['notify'].append(mp)
         for s in m.transmitters:
             _LOGGER.info("adding MoIP Tx %s", s)
             hass.data[DEVICES]['sensor'].append(s)
@@ -76,6 +78,7 @@ def setup(hass, config):
     discovery.load_platform(hass, 'media_player', DOMAIN, None, config)
     discovery.load_platform(hass, 'sensor', DOMAIN, None, config)
     discovery.load_platform(hass, 'remote', DOMAIN, None, config)
+    discovery.load_platform(hass, 'notify', DOMAIN, None, config)
 
     return True
 
@@ -96,6 +99,7 @@ async def async_setup_entry(hass, entry):
         'media_player': list(m.receivers),
         'sensor': list(m.transmitters),
         'remote': list(m.receivers),
+        'notify': list(m.receivers),
     }
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = m
