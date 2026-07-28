@@ -1,0 +1,21 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "Connect to your Binary MoIP Controller over its Telnet control port (23).",
+        "data": {
+          "host": "Host",
+          "username": "Username",
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect. Check the host and try again.",
+      "unknown": "Unexpected error"
+    },
+    "abort": {
+      "already_configured": "This MoIP controller is already configured"
+    }
+  }
+}
