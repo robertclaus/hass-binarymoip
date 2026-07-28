@@ -242,6 +242,11 @@ class MoIP_Receiver(object):
     def set_cec(self, cec_on):
         self._send_check("!CEC=%s,%d" % (self._num, 1 if cec_on else 0))
 
+    def send_ir(self, pronto_code):
+        """Send an IR command (Pronto Hex format) out this receiver's IR
+        flasher output, e.g. to power a TV on/off."""
+        self._send_check("!IR=0,%s,%s" % (self._num, pronto_code))
+
     def __str__(self):
         return "{MoIP Rx#%d \"%s\" from %s}" % (self._num,
                                                   self._name,
