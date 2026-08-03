@@ -49,14 +49,12 @@ class MoIP_MediaPlayer_Rx(MediaPlayerEntity):
     def tx_full_name(self, tx_num):
         """Returns the full name of the transmitter with number tx_num.
         This returns a string like '1-AVR'."""
-        num_transmitters = len(self._rx._mc.transmitters)
-        if tx_num > num_transmitters:
-            _LOGGER.error("tx_num = %s is too large, only %s transmitters",
-                           tx_num, num_transmitters)
+        tx = self._rx._mc._transmitters_by_index.get(tx_num)
+        if tx is None:
+            _LOGGER.error("tx_num = %s does not match any known transmitter",
+                           tx_num)
             return None
-        else:
-            tx = self._rx._mc.transmitters[tx_num-1]
-            return "%d-%s" % (tx_num, tx.name)
+        return "%d-%s" % (tx_num, tx.name)
 
     @property
     def state(self):
@@ -78,18 +76,19 @@ class MoIP_MediaPlayer_Rx(MediaPlayerEntity):
         """Select input source."""
         (source_num, rest) = source.split("-", 1)
         _LOGGER.info("Switching %s to %s - #%s", self._rx, source, source_num)
-        self._rx.switch_to_tx(int(source_num)-1)  # they are 0-indexed in lib
+        tx = self._rx._mc._transmitters_by_index.get(int(source_num))
+        if tx is None:
+            _LOGGER.error("source_num = %s does not match any known "
+                           "transmitter", source_num)
+            return
+        self._rx.switch_to_tx(tx)  # switch by real device index, not position
         self.schedule_update_ha_state()
 
     @property
     def source_list(self):
         """Return list of available inputs of the device."""
-        ai = []
-        num = 1
-        for t in self._rx._mc.transmitters:
-            ai.append("%d-%s" % (num, t.name))
-            num += 1
-        return ai
+        return ["%d-%s" % (t.num, t.name)
+                for t in self._rx._mc.transmitters]
 
     @property
     def supported_features(self):
